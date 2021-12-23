@@ -202,24 +202,24 @@ class GasAnalysisData:
         self.__baromPress = baromPress
         self.__allBagData = allBagData # Change to self.__allBagData later
 
-    def calculatePowerOutput(self, bagNum):
+    def __calculatePowerOutput(self, bagNum):
         powerOutput = ((self.__allBagData[bagNum][1] * 9.81) * (1.622 * self.__allBagData[bagNum][3]) / self.__allBagData[bagNum][0])
         self.__allBagData[bagNum].append(round(powerOutput, 2))
 
-    def calculateTotalVolume(self, bagNum):
+    def __calculateTotalVolume(self, bagNum):
         totalVolume = (self.__allBagData[bagNum][6] + self.__allBagData[bagNum][7])
         self.__allBagData[bagNum].append(round(totalVolume, 2))
 
-    def calculateVeAtps(self, bagNum):
+    def __calculateVeAtps(self, bagNum):
         veAtps = ((self.__allBagData[bagNum][10]) / (self.__allBagData[bagNum][0] / 60))
         self.__allBagData[bagNum].append(round(veAtps, 2))
 
-    def calculateVeStpd(self, bagNum):
+    def __calculateVeStpd(self, bagNum):
         swvp = ((1.001 * self.__allBagData[bagNum][8]) - 4.19)
         veStpd = (self.__allBagData[bagNum][11] * ((self.__baromPress - swvp) / 760) * (273 / (273 + self.__allBagData[bagNum][8])))
         self.__allBagData[bagNum].append(round(veStpd, 2))
 
-    def calculateVo2(self, bagNum):
+    def __calculateVo2(self, bagNum):
         fiN2 = 79.04
         feN2 = (100 - (self.__allBagData[bagNum][4] + self.__allBagData[bagNum][5]))
         vi = ((feN2 / fiN2) * self.__allBagData[bagNum][12])
@@ -228,7 +228,7 @@ class GasAnalysisData:
         vo2 = (vo2Insp - vo2Exp)
         self.__allBagData[bagNum].append(round(vo2, 2))
 
-    def calculateVco2(self, bagNum):
+    def __calculateVco2(self, bagNum):
         fiN2 = 79.04
         feN2 = (100 - (self.__allBagData[bagNum][4] + self.__allBagData[bagNum][5]))
         vi = ((feN2 / fiN2) * self.__allBagData[bagNum][12])
@@ -237,33 +237,38 @@ class GasAnalysisData:
         vco2 = (vco2Exp - vco2Insp)
         self.__allBagData[bagNum].append(round(vco2, 2))
 
-    def calculateRer(self, bagNum):
+    def __calculateRer(self, bagNum):
         rer = (self.__allBagData[bagNum][14] / self.__allBagData[bagNum][13])
         self.__allBagData[bagNum].append(round(rer, 2))
         
     # Calls all 'calculate' methods in this class in a for loop for the number of bags there are
     def appendAllBagData(self):
         for i in range(self.__numBags):
-            self.calculatePowerOutput(i)
-            self.calculateTotalVolume(i)
-            self.calculateVeAtps(i)
-            self.calculateVeStpd(i)
-            self.calculateVo2(i)
-            self.calculateVco2(i)
-            self.calculateRer(i)
+            self.__calculatePowerOutput(i)
+            self.__calculateTotalVolume(i)
+            self.__calculateVeAtps(i)
+            self.__calculateVeStpd(i)
+            self.__calculateVo2(i)
+            self.__calculateVco2(i)
+            self.__calculateRer(i)
 
+    # Creates the gas analysis data table
     def createGasAnalysisTable(self):
-        table = []
+        table = [] # 2D array which will contain columnHeaders and each of the sub-arrays of columnCells
         columnHeaders = ["Data"]
         columnCells = [["Time (s)"], ["Applied Mass (kg)"], ["Heart Rate (bpm)"], ["Flywheel Count"], ["FEO2 (%)"], ["FECO2 (%)"],
                        ["Sample Volume (L)"], ["Remaining Volume (L)"], ["Bag Temperature (C)"], ["Power Output (W)"],
                        ["Total Bag Volume (L)"], ["VE ATPS (L/min)"], ["VE STPD (L/min)"], ["VO2 (L/min)"], ["VCO2 (L/min)"],
                        ["RER"]]
-        
+
+        # Appends the bag numbers to the columnHeaders array
         for i in range(self.__numBags):
             columnHeaders.append("Bag " + str(i + 1))
+
+        # Appends the columnHeaders array into the table array
         table.append(columnHeaders)
 
+        # Appends the value in allBagData to each of the respective columnCells sub-arrays
         for j in range(self.__numBags):
             columnCells[0].append(self.__allBagData[j][0])
             columnCells[1].append(self.__allBagData[j][1])
@@ -282,6 +287,7 @@ class GasAnalysisData:
             columnCells[14].append(self.__allBagData[j][14])
             columnCells[15].append(self.__allBagData[j][15])
 
+        # Appends the columnCells sub-arrays into the table array
         for k in range(16):
             table.append(columnCells[k])
 
